@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>הגדרת גישה למערכת</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ocean: #1C3A4A;
+      --gold:  #C8A96E;
+      --dg:    #A07840;
+      --cream: #F5F1EB;
+      --sand:  #E8DDD0;
+      --red:   #B8624C;
+      --green: #2E5D4B;
+    }
+    body { font-family: 'Heebo', sans-serif; background: var(--cream); color: #1a2830; min-height: 100vh; display: flex; flex-direction: column; }
+
+    .nav { background: var(--cream); border-bottom: 1px solid rgba(28,58,74,.1); padding: 0 24px; height: 60px; display: flex; align-items: center; }
+    .nav-logo { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500; color: var(--ocean); text-decoration: none; }
+    .nav-logo span { color: var(--gold); font-style: italic; }
+
+    .progress-wrap { background: rgba(28,58,74,.06); height: 4px; }
+    .progress-bar { height: 4px; background: linear-gradient(to left, var(--gold), var(--dg)); transition: width .5s ease; }
+
+    .container { max-width: 480px; margin: 0 auto; padding: 48px 24px 80px; flex: 1; }
+
+    .card { background: #fff; border-radius: 16px; padding: 40px; border: 1px solid rgba(28,58,74,.07); box-shadow: 0 2px 24px rgba(28,58,74,.07); }
+    .card-icon { font-size: 48px; margin-bottom: 16px; }
+    .card-title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 400; color: var(--ocean); margin-bottom: 8px; }
+    .card-sub { font-size: 14px; color: #7a8e99; margin-bottom: 28px; line-height: 1.6; }
+
+    .field { margin-bottom: 18px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; color: var(--ocean); margin-bottom: 7px; }
+    .field input { width: 100%; padding: 13px 15px; border: 1px solid #d8d3ca; border-radius: 9px; font-family: 'Heebo', sans-serif; font-size: 15px; color: #1a2830; background: #faf9f6; direction: rtl; transition: border-color .2s, box-shadow .2s; }
+    .field input:focus { outline: none; border-color: var(--gold); background: #fff; box-shadow: 0 0 0 3px rgba(200,169,110,.15); }
+    .field input.error { border-color: var(--red); }
+
+    .pwd-wrap { position: relative; }
+    .pwd-wrap input { padding-left: 42px; }
+    .pwd-toggle { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; color: #8a9ba5; padding: 4px; }
+
+    .pwd-strength { height: 3px; border-radius: 2px; margin-top: 6px; background: #e0dbd4; overflow: hidden; }
+    .pwd-strength-bar { height: 100%; border-radius: 2px; transition: width .3s, background .3s; width: 0; }
+    .pwd-hint { font-size: 12px; color: #9aabb5; margin-top: 5px; }
+
+    .error-msg { background: rgba(184,98,76,.1); border: 1px solid rgba(184,98,76,.3); border-radius: 8px; padding: 11px 14px; color: var(--red); font-size: 13px; margin-bottom: 16px; display: none; }
+    .error-msg.show { display: block; }
+
+    .btn-primary { width: 100%; background: var(--ocean); color: var(--cream); border: none; padding: 14px; border-radius: 9px; font-family: 'Heebo', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; transition: background .2s, transform .15s; margin-top: 8px; }
+    .btn-primary:hover { background: #2a5570; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: .5; cursor: default; transform: none; }
+
+    .btn-gold { width: 100%; background: var(--gold); color: var(--ocean); border: none; padding: 14px; border-radius: 9px; font-family: 'Heebo', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; transition: all .2s; margin-top: 8px; text-decoration: none; display: block; text-align: center; }
+    .btn-gold:hover { background: var(--dg); color: #fff; transform: translateY(-1px); }
+
+    .step { display: none; }
+    .step.active { display: block; animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+
+    .success-check { width: 72px; height: 72px; border-radius: 50%; background: rgba(46,93,75,.12); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 36px; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">Forms <span>SaaS</span></a>
+</nav>
+<div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:33%"></div></div>
+
+<div class="container">
+
+  <!-- Step 1: Identity verification -->
+  <div class="step active" id="step1">
+    <div class="card">
+      <div class="card-icon">👋</div>
+      <div class="card-title">ברוכים הבאים!</div>
+      <div class="card-sub">כדי לאמת את זהותך, הזן את מספר תעודת הזהות שלך</div>
+      <div class="error-msg" id="err1"></div>
+      <div class="field">
+        <label>תעודת זהות</label>
+        <input type="text" id="idNumber" placeholder="000000000" inputmode="numeric" />
+      </div>
+      <button class="btn-primary" onclick="goStep2()">אמת →</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Set password -->
+  <div class="step" id="step2">
+    <div class="card">
+      <div class="card-icon">🔐</div>
+      <div class="card-title">בחר סיסמה</div>
+      <div class="card-sub">בחר סיסמה חזקה שתשמש אותך להתחברות למערכת</div>
+      <div class="error-msg" id="err2"></div>
+      <div class="field">
+        <label>סיסמה חדשה</label>
+        <div class="pwd-wrap">
+          <input type="password" id="password" placeholder="לפחות 8 תווים" oninput="checkStrength()" />
+          <button type="button" class="pwd-toggle" onclick="togglePwd('password',this)">👁</button>
+        </div>
+        <div class="pwd-strength"><div class="pwd-strength-bar" id="strengthBar"></div></div>
+        <div class="pwd-hint" id="strengthHint">לפחות 8 תווים</div>
+      </div>
+      <div class="field">
+        <label>אימות סיסמה</label>
+        <div class="pwd-wrap">
+          <input type="password" id="password2" placeholder="הכנס שוב את הסיסמה" />
+          <button type="button" class="pwd-toggle" onclick="togglePwd('password2',this)">👁</button>
+        </div>
+      </div>
+      <button class="btn-primary" id="submitBtn" onclick="submitOnboard()">הגדר גישה ✓</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Success -->
+  <div class="step" id="step3">
+    <div class="card" style="text-align:center;padding:52px 40px;">
+      <div class="success-check">✓</div>
+      <div class="card-title" style="margin-bottom:12px;">הגישה הוגדרה בהצלחה!</div>
+      <p class="card-sub" style="margin-bottom:32px;">הסיסמה שלך נשמרה. ניתן להתחבר למערכת עכשיו.</p>
+      <a href="/admin.html" class="btn-gold">התחבר למערכת →</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var TOKEN = (function() {
+    var parts = window.location.pathname.split('/');
+    return parts[parts.length - 1] || '';
+  })();
+
+  if (!TOKEN) {
+    document.querySelector('.container').innerHTML = '<div class="card" style="text-align:center;padding:48px;"><div style="font-size:48px;margin-bottom:16px;">⚠️</div><div style="font-family:Fraunces,serif;font-size:22px;color:var(--ocean);">הקישור לא תקין</div><p style="color:#7a8e99;margin-top:12px;">אנא פנה למנהל המערכת.</p></div>';
+  }
+
+  function goStep(n) {
+    document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+    document.getElementById('step' + n).classList.add('active');
+    var pct = [33, 66, 100][n - 1];
+    document.getElementById('progressBar').style.width = pct + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goStep2() {
+    var idNumber = document.getElementById('idNumber').value.trim();
+    var err1 = document.getElementById('err1');
+    err1.classList.remove('show');
+    if (!idNumber) { err1.textContent = 'אנא הזן תעודת זהות'; err1.classList.add('show'); return; }
+    goStep(2);
+  }
+
+  function togglePwd(id, btn) {
+    var inp = document.getElementById(id);
+    if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+    else { inp.type = 'password'; btn.textContent = '👁'; }
+  }
+
+  function checkStrength() {
+    var pwd = document.getElementById('password').value;
+    var bar = document.getElementById('strengthBar');
+    var hint = document.getElementById('strengthHint');
+    var score = 0;
+    if (pwd.length >= 8) score++;
+    if (pwd.length >= 12) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    var pct = Math.round((score / 5) * 100);
+    var colors = ['#B8624C','#d4802a','#C8A96E','#2E5D4B'];
+    var labels = ['חלשה מאוד','חלשה','בינונית','חזקה','חזקה מאוד'];
+    bar.style.width = pct + '%';
+    bar.style.background = colors[Math.min(score - 1, 3)] || '#e0dbd4';
+    hint.textContent = pwd.length === 0 ? 'לפחות 8 תווים' : labels[Math.min(score, 4)];
+  }
+
+  async function submitOnboard() {
+    var idNumber = document.getElementById('idNumber').value.trim();
+    var password = document.getElementById('password').value;
+    var password2 = document.getElementById('password2').value;
+    var err2 = document.getElementById('err2');
+    err2.classList.remove('show');
+
+    if (password.length < 8) { err2.textContent = 'הסיסמה חייבת להכיל לפחות 8 תווים'; err2.classList.add('show'); return; }
+    if (password !== password2) { err2.textContent = 'הסיסמאות אינן תואמות'; err2.classList.add('show'); return; }
+
+    var btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ שומר...';
+
+    try {
+      var resp = await fetch('/api/onboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: TOKEN, idNumber: idNumber, password: password })
+      });
+      var data = await resp.json();
+      if (data.ok) {
+        goStep(3);
+      } else {
+        err2.textContent = data.error || 'שגיאה. נסה שוב.';
+        err2.classList.add('show');
+        btn.disabled = false;
+        btn.textContent = 'הגדר גישה ✓';
+      }
+    } catch(e) {
+      err2.textContent = 'שגיאת תקשורת. נסה שוב.';
+      err2.classList.add('show');
+      btn.disabled = false;
+      btn.textContent = 'הגדר גישה ✓';
+    }
+  }
+</script>
+</body>
+</html>
