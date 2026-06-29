@@ -15,12 +15,13 @@ const app        = express();
 const PORT       = process.env.PORT || 3002;
 
 /* ── Logger ── */
+const IS_VERCEL = !!process.env.VERCEL;
 const LOG_FILE = path.join(__dirname, 'logs', 'app.log');
-if (!fs.existsSync(path.join(__dirname, 'logs'))) fs.mkdirSync(path.join(__dirname, 'logs'));
+if (!IS_VERCEL && !fs.existsSync(path.join(__dirname, 'logs'))) fs.mkdirSync(path.join(__dirname, 'logs'));
 function log(level, msg, data) {
   const line = `[${new Date().toISOString()}] [${level}] ${msg}${data ? ' ' + JSON.stringify(data) : ''}\n`;
   process.stdout.write(line);
-  fs.appendFileSync(LOG_FILE, line);
+  if (!IS_VERCEL) fs.appendFileSync(LOG_FILE, line);
 }
 const logger = { info: (m,d) => log('INFO', m,d), warn: (m,d) => log('WARN', m,d), error: (m,d) => log('ERROR', m,d) };
 const UPLOADS_DIR    = path.join(__dirname, 'uploads');
