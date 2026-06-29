@@ -196,6 +196,7 @@ const formFileUpload = multer({
 });
 
 /* ── Security ── */
+app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 app.use(express.json({ limit: '2mb' }));
 
