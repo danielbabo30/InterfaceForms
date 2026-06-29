@@ -1432,7 +1432,7 @@ async function doLogin() {
   const errEl    = document.getElementById('loginError');
   const btn      = document.getElementById('loginBtn');
   errEl.style.display = 'none';
-  btn.disabled = true; btn.textContent = '⏳ מתחבר...';
+  btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-left:8px;"></span> מתחבר...';
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
