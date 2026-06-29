@@ -208,6 +208,7 @@ const adminLimiter  = rateLimit({ windowMs: 60 * 1000, max: 200, standardHeaders
 const authLimiter   = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false });
 
 /* ── Static ── */
+app.get('/',             (req, res) => res.redirect('/admin.html'));
 app.get('/admin.html',   (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 app.get('/super-admin',  (req, res) => res.sendFile(path.join(__dirname, 'super-admin.html')));
 app.get('/register',     (req, res) => res.sendFile(path.join(__dirname, 'register.html')));
